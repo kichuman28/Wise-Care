@@ -53,3 +53,4 @@ windows/flutter/generated_plugins.cmake
 # Keystore files
 *.keystore
 !android/app/debug.keystore
+android/app/google-services.json
