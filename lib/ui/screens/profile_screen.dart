@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/auth_provider.dart';
+import '../screens/login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -54,7 +55,12 @@ class ProfileScreen extends StatelessWidget {
                       try {
                         await authProvider.signOut();
                         if (context.mounted) {
-                          Navigator.of(context).pushReplacementNamed('/login');
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
+                            ),
+                            (route) => false,
+                          );
                         }
                       } catch (e) {
                         if (context.mounted) {
