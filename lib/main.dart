@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'core/providers/auth_provider.dart';
 import 'ui/screens/login_screen.dart';
 import 'core/theme/app_theme.dart';
 
@@ -14,11 +16,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Wise Care',
-      theme: AppTheme.lightTheme,
-      debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Wise Care',
+        theme: AppTheme.lightTheme,
+        debugShowCheckedModeBanner: false,
+        home: const LoginScreen(),
+      ),
     );
   }
 }
