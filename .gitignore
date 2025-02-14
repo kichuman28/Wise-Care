@@ -54,3 +54,6 @@ windows/flutter/generated_plugins.cmake
 *.keystore
 !android/app/debug.keystore
 android/app/google-services.json
+.vscode/settings.json
+android/app/.cxx/
+pubspec.lock
