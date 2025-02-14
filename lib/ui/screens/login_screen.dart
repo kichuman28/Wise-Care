@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Spacer(),
                 Center(
                   child: Image.asset(
-                    'assets/logo/logo.png',
+                    'assets/logo/logo_no_text.png',
                     width: 120,
                     height: 120,
                   ),
