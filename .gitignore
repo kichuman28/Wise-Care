@@ -60,3 +60,8 @@ pubspec.lock
 linux/flutter/generated_plugins.cmake
 windows/flutter/generated_plugin_registrant.h
 macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Environment files
+.env
+*.env
+.env.*
