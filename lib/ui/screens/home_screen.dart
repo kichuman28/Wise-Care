@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/greeting_header.dart';
 import '../../core/theme/app_theme.dart';
+import '../widgets/sos_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,66 +17,55 @@ class HomeScreen extends StatelessWidget {
             children: [
               const GreetingHeader(),
               const SizedBox(height: 24),
-              
-              // Emergency SOS Button
+
+              // Emergency SOS Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.red.shade300,
-                        Colors.red.shade400,
-                      ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Emergency Help',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
                     ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.red.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {},
-                      borderRadius: BorderRadius.circular(16),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.emergency,
-                                color: Colors.white,
-                                size: 24,
-                              ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Press and hold the SOS button for emergency assistance',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                    ),
+                    const SizedBox(height: 24),
+                    Center(
+                      child: SOSButton(
+                        onSOSActivated: (String alertId) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Emergency alert activated'),
+                              backgroundColor: Colors.green,
                             ),
-                            const SizedBox(width: 16),
-                            Text(
-                              'Emergency',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          );
+                        },
+                        onSOSCancelled: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Emergency alert cancelled'),
+                              backgroundColor: Colors.orange,
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Quick Actions Grid
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -85,9 +75,9 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       'Quick Actions',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
                     ),
                     const SizedBox(height: 16),
                     GridView.count(
@@ -127,9 +117,9 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Health Overview
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -139,9 +129,9 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       'Health Overview',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
                     ),
                     const SizedBox(height: 16),
                     Container(
@@ -187,7 +177,7 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
             ],
           ),
@@ -217,8 +207,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(
-      BuildContext context, String title, IconData icon, List<Color> colors) {
+  Widget _buildActionCard(BuildContext context, String title, IconData icon, List<Color> colors) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -250,9 +239,9 @@ class HomeScreen extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
               ],
             ),
@@ -262,8 +251,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHealthMetric(BuildContext context, String label, String value,
-      IconData icon, Color color) {
+  Widget _buildHealthMetric(BuildContext context, String label, String value, IconData icon, Color color) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -288,15 +276,15 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       label,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                            color: Colors.grey[600],
+                          ),
                     ),
                     Text(
                       value,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
                     ),
                   ],
                 ),
@@ -312,4 +300,4 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}
