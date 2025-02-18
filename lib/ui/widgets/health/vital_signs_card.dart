@@ -1,94 +1,103 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/health_module_model.dart';
+import 'package:provider/provider.dart';
 
 class VitalSignsCard extends StatelessWidget {
   const VitalSignsCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer<HealthModuleModel>(
+      builder: (context, model, _) {
+        return Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Latest Readings',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Latest Readings',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Navigate to detailed vital signs history
+                      },
+                      child: const Text('View History'),
+                    ),
+                  ],
                 ),
-                TextButton(
+                const SizedBox(height: 16),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildVitalSignCard(
+                        context,
+                        'Blood Pressure',
+                        '120/80',
+                        'mmHg',
+                        Icons.favorite,
+                        Colors.red,
+                      ),
+                      const SizedBox(width: 12),
+                      _buildVitalSignCard(
+                        context,
+                        'Heart Rate',
+                        '72',
+                        'BPM',
+                        Icons.monitor_heart,
+                        Colors.pink,
+                      ),
+                      const SizedBox(width: 12),
+                      _buildVitalSignCard(
+                        context,
+                        'Temperature',
+                        '98.6',
+                        '°F',
+                        Icons.thermostat,
+                        Colors.orange,
+                      ),
+                      const SizedBox(width: 12),
+                      _buildVitalSignCard(
+                        context,
+                        'Oxygen Level',
+                        '98',
+                        '%',
+                        Icons.air,
+                        Colors.blue,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
                   onPressed: () {
-                    // Navigate to detailed vital signs history
+                    // Show dialog to record new vital signs
                   },
-                  child: const Text('View History'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                  child: const Text('Record New Reading'),
+                ),
+                FloatingActionButton(
+                  onPressed: () => model.syncWithGoogleFit(),
+                  child: const Icon(Icons.refresh),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildVitalSignCard(
-                    context,
-                    'Blood Pressure',
-                    '120/80',
-                    'mmHg',
-                    Icons.favorite,
-                    Colors.red,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildVitalSignCard(
-                    context,
-                    'Heart Rate',
-                    '72',
-                    'BPM',
-                    Icons.monitor_heart,
-                    Colors.pink,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildVitalSignCard(
-                    context,
-                    'Temperature',
-                    '98.6',
-                    '°F',
-                    Icons.thermostat,
-                    Colors.orange,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildVitalSignCard(
-                    context,
-                    'Oxygen Level',
-                    '98',
-                    '%',
-                    Icons.air,
-                    Colors.blue,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: () {
-                // Show dialog to record new vital signs
-              },
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              child: const Text('Record New Reading'),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -146,4 +155,4 @@ class VitalSignsCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

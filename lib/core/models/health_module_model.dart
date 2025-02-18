@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:health/health.dart';
+import '../services/google_fit_service.dart';
 
 class HealthModuleModel extends ChangeNotifier {
   List<VitalSign> vitalSigns = [];
@@ -6,6 +8,9 @@ class HealthModuleModel extends ChangeNotifier {
   List<DietPlan> dietPlans = [];
   List<ExerciseRoutine> exerciseRoutines = [];
   SleepData? sleepData;
+  final GoogleFitService _googleFitService;
+
+  HealthModuleModel(this._googleFitService);
 
   Future<void> updateVitalSigns(VitalSign vitalSign) async {
     try {
@@ -14,6 +19,32 @@ class HealthModuleModel extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error updating vital signs: $e');
       rethrow;
+    }
+  }
+
+  Future<void> syncWithGoogleFit() async {
+    try {
+      final authorized = await _googleFitService.authorize();
+      if (!authorized) return;
+
+      final heartRateData = await _googleFitService.getHealthData(
+        HealthDataType.HEART_RATE,
+      );
+
+      // Process and store the data
+      vitalSigns = heartRateData
+          .map((point) => VitalSign(
+                timestamp: point.dateFrom,
+                heartRate: (point.value as double).toInt(),
+                bloodPressure: 0.0, // Default value
+                temperature: 0.0, // Default value
+                oxygenLevel: 0, // Default value
+              ))
+          .toList();
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Google Fit sync error: $e');
     }
   }
 }

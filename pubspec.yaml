@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_core: ^2.0.0
   firebase_auth: ^4.0.0
-  google_sign_in: ^6.0.0
+  google_sign_in: ^6.1.5
   provider: ^6.1.1
   cloudinary_public: ^0.21.0
   file_picker: ^6.1.1
@@ -53,6 +53,8 @@ dependencies:
   battery_plus: ^4.1.0
   connectivity_plus: ^5.0.2
   sensors_plus: ^3.1.0
+  health: ^12.0.1
+  flutter_secure_storage: ^8.0.0
 
 dev_dependencies:
   flutter_test:

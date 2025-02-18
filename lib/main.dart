@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/providers/document_provider.dart';
+import 'core/models/health_module_model.dart';
+import 'core/services/google_fit_service.dart';
 import 'ui/screens/login_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -53,6 +55,11 @@ class _MyAppState extends State<MyApp> {
             }
             return null;
           },
+        ),
+        Provider(create: (_) => GoogleFitService()),
+        ChangeNotifierProxyProvider<GoogleFitService, HealthModuleModel>(
+          create: (context) => HealthModuleModel(context.read<GoogleFitService>()),
+          update: (context, googleFitService, previous) => previous ?? HealthModuleModel(googleFitService),
         ),
       ],
       child: MaterialApp(
