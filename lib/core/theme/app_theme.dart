@@ -6,10 +6,11 @@ class AppColors {
   static const Color tertiary = Color(0xFFA9B5DF); // Light Blue-Gray
   static const Color quaternary = Color(0xFFFFF2F2); // Very Light Pink
 
-  static const Color background = Color(0xFFFFF2F2); // Using quaternary as background
+  static const Color background = Colors.white; // Pure white background for better contrast
   static const Color surface = Colors.white;
+  static const Color cardBackground = Color(0xFFF8F9FC); // Light gray for cards
   static const Color text = Color(0xFF2D336B); // Using primary for text
-  static const Color textSecondary = Color(0xFF7886C7); // Using secondary for secondary text
+  static const Color textSecondary = Color(0xFF666666); // Darker secondary text for better readability
 }
 
 class AppTheme {
@@ -27,7 +28,7 @@ class AppTheme {
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onTertiary: AppColors.primary,
-      error: Colors.red,
+      error: const Color(0xFFD32F2F),
       onError: Colors.white,
     ),
     textTheme: TextTheme(
@@ -35,32 +36,58 @@ class AppTheme {
         fontSize: 32,
         fontWeight: FontWeight.bold,
         color: AppColors.text,
+        height: 1.3,
       ),
       displayMedium: TextStyle(
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: FontWeight.bold,
         color: AppColors.text,
+        height: 1.3,
+      ),
+      titleLarge: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        color: AppColors.text,
+        height: 1.3,
+      ),
+      titleMedium: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: AppColors.text,
+        height: 1.3,
       ),
       bodyLarge: TextStyle(
-        fontSize: 16,
+        fontSize: 18, // Increased for better readability
         color: AppColors.text,
+        height: 1.5,
       ),
       bodyMedium: TextStyle(
-        fontSize: 14,
+        fontSize: 16, // Increased for better readability
         color: AppColors.textSecondary,
+        height: 1.5,
+      ),
+    ),
+    cardTheme: CardTheme(
+      color: AppColors.cardBackground,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       elevation: 0,
       backgroundColor: Colors.white,
+      selectedItemColor: AppColors.primary,
+      unselectedItemColor: AppColors.textSecondary,
       selectedLabelStyle: TextStyle(
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: FontWeight.w600,
         color: AppColors.primary,
       ),
-      unselectedLabelStyle: const TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
+      unselectedLabelStyle: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: AppColors.textSecondary,
       ),
     ),
   );
