@@ -47,35 +47,80 @@ class FallDetectionService {
 
   Future<void> _handlePotentialFall(double magnitude) async {
     _isWarningShown = true;
+    int remainingSeconds = WARNING_DURATION;
 
-    // Show warning dialog
     showDialog(
       context: navigatorKey.currentContext!,
       barrierDismissible: false,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
+          // Start countdown timer only once
+          if (_warningTimer == null || !_warningTimer!.isActive) {
+            _warningTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+              if (remainingSeconds > 0) {
+                setState(() => remainingSeconds--);
+              } else {
+                timer.cancel();
+              }
+            });
+          }
+
           return AlertDialog(
-            title: const Text(
-              'Fall Detected!',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            title: Row(
+              children: [
+                const Icon(Icons.warning_amber, color: Colors.red, size: 30),
+                const SizedBox(width: 10),
+                const Text('Fall Detected!'),
+              ],
             ),
             content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('SOS will be triggered in $WARNING_DURATION seconds'),
+                const Text(
+                  'A potential fall has been detected.',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade100,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$remainingSeconds',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red.shade900,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'SOS will be triggered in $remainingSeconds seconds',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 const Text('Tap Cancel if this was a false alarm'),
               ],
             ),
-            backgroundColor: Colors.orange[100],
-            icon: const Icon(Icons.warning_amber, color: Colors.orange),
             actions: [
               TextButton(
                 onPressed: () {
                   _cancelWarning();
                   Navigator.of(context).pop();
                 },
-                child: const Text('Cancel'),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
             ],
           );
@@ -83,8 +128,8 @@ class FallDetectionService {
       ),
     );
 
-    // Start countdown timer
-    _warningTimer = Timer(Duration(seconds: WARNING_DURATION), () async {
+    // Start SOS timer
+    Timer(Duration(seconds: WARNING_DURATION), () async {
       if (_isWarningShown) {
         try {
           final position = await _sosService.getCurrentLocation();
@@ -94,7 +139,9 @@ class FallDetectionService {
             priority: 'high',
             medicalInfo: {'fallDetected': true, 'impactMagnitude': magnitude},
           );
-          scaffoldKey.currentState?.hideCurrentMaterialBanner();
+
+          Navigator.of(navigatorKey.currentContext!).pop(); // Close warning dialog
+
           scaffoldKey.currentState?.showSnackBar(
             const SnackBar(
               content: Text('SOS Alert Activated'),
