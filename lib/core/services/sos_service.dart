@@ -53,6 +53,7 @@ class SOSService {
         'assignedTo': null,
         'resolvedAt': null,
         'notes': [],
+        'detectionMethod': medicalInfo?['fallDetected'] == true ? 'automatic' : 'manual',
       };
 
       // Add to Firestore
@@ -67,7 +68,8 @@ class SOSService {
     try {
       await _firestore.collection('sos_alerts').doc(alertId).update({
         'status': 'cancelled',
-        'resolvedAt': FieldValue.serverTimestamp(),
+        'cancelledAt': FieldValue.serverTimestamp(),
+        'responseTimeline.cancelled': FieldValue.serverTimestamp(),
       });
     } catch (e) {
       throw Exception('Failed to cancel SOS alert: $e');

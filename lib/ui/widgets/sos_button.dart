@@ -115,81 +115,158 @@ class _SOSButtonState extends State<SOSButton> with SingleTickerProviderStateMix
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
-        child: AlertDialog(
-          title: Row(
-            children: [
-              const Icon(Icons.warning_amber_rounded, color: Colors.red),
-              const SizedBox(width: 8),
-              const Text('SOS Alert Active'),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('SOS Alert Active'),
+        content: StreamBuilder<DocumentSnapshot>(
+          stream: _sosService.listenToSOSAlert(_currentAlertId!),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            final status = data['status'] as String;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_getStatusMessage(status)),
+                const SizedBox(height: 16),
+                if (data['assignedTo'] != null) ...[
+                  const Text(
+                    'Help is on the way!',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  if (data['responder'] != null) ...[
+                    Text('Responder: ${data['responder']['name']}'),
+                    Text('Phone: ${data['responder']['phone']}'),
+                  ],
+                ],
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => _showCancellationWarning(context),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Cancel SOS'),
           ),
-          content: StreamBuilder<DocumentSnapshot>(
-  stream: _sosService.listenToSOSAlert(_currentAlertId!),
-  builder: (context, snapshot) {
-    if (!snapshot.hasData) {
-      return const CircularProgressIndicator();
-    }
+        ],
+      ),
+    );
+  }
 
-    final data = snapshot.data!.data() as Map<String, dynamic>;
-    final status = data['status'] as String;
-    final responder = data['responder'] as Map<String, dynamic>?;
-
-    Widget content;
-    switch (status) {
-      case 'pending':
-        content = const Text('Emergency services have been notified. Please wait...');
-        break;
-      case 'assigned':
-        content = Column(
+  Future<void> _showCancellationWarning(BuildContext context) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'Warning',
+          style: TextStyle(color: Colors.red),
+        ),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Help is on the way!'),
-            if (responder != null) ...[
-              const SizedBox(height: 16),
-              Text('Responder: ${responder['name']}'),
-              Text('Phone: ${responder['phone']}'),
-            ],
-          ],
-        );
-        break;
-      case 'resolved':
-        content = const Text('Emergency has been resolved.');
-        break;
-      default:
-        content = const Text('Connecting to emergency services...');
-    }
-
-    return content;
-  },
-),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                try {
-                  await _sosService.cancelSOSAlert(_currentAlertId!);
-                  widget.onSOSCancelled?.call();
-                  if (mounted) {
-                    Navigator.of(context).pop();
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to cancel SOS: ${e.toString()}'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-              child: const Text('Cancel SOS'),
+            const Text(
+              'Are you sure you want to cancel the SOS alert?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Only cancel if:',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            _buildWarningPoint('The emergency situation is resolved'),
+            _buildWarningPoint('You activated SOS by mistake'),
+            _buildWarningPoint('You no longer need emergency assistance'),
+            const SizedBox(height: 16),
+            const Text(
+              'If you are still in danger, do NOT cancel the alert!',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Keep Active'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Yes, Cancel SOS'),
+          ),
+        ],
       ),
     );
+
+    if (confirm == true && mounted) {
+      await _cancelSOS();
+      Navigator.of(context).pop(); // Close the active SOS dialog
+    }
+  }
+
+  Widget _buildWarningPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• '),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _cancelSOS() async {
+    try {
+      await _sosService.cancelSOSAlert(_currentAlertId!);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('SOS alert has been cancelled'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        widget.onSOSCancelled?.call();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to cancel SOS: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  String _getStatusMessage(String status) {
+    switch (status) {
+      case 'pending':
+        return 'Emergency services have been notified. Please wait...';
+      case 'assigned':
+        return 'A responder has been assigned to help you.';
+      case 'resolved':
+        return 'Emergency has been resolved.';
+      case 'cancelled':
+        return 'Alert has been cancelled.';
+      default:
+        return 'Processing your emergency alert...';
+    }
   }
 
   @override

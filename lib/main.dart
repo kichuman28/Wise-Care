@@ -6,6 +6,8 @@ import 'core/providers/document_provider.dart';
 import 'ui/screens/login_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'core/services/sos_service.dart';
+import 'core/services/fall_detection_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,8 +16,29 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  late final SOSService _sosService;
+  late final FallDetectionService _fallDetectionService;
+
+  @override
+  void initState() {
+    super.initState();
+    _sosService = SOSService();
+    _fallDetectionService = FallDetectionService(
+      _sosService,
+      scaffoldKey: _scaffoldKey,
+      navigatorKey: _navigatorKey,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +56,19 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        scaffoldMessengerKey: _scaffoldKey,
+        navigatorKey: _navigatorKey,
         title: 'Wise Care',
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
-        home: const LoginScreen(),
+        home: Builder(
+          builder: (context) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _fallDetectionService.startMonitoring();
+            });
+            return const LoginScreen();
+          },
+        ),
       ),
     );
   }
