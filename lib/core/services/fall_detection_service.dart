@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 import 'package:flutter/material.dart';
@@ -133,7 +134,7 @@ class FallDetectionService {
       if (_isWarningShown) {
         try {
           final position = await _sosService.getCurrentLocation();
-          await _sosService.createSOSAlert(
+          final alertId = await _sosService.createSOSAlert(
             latitude: position.latitude,
             longitude: position.longitude,
             priority: 'high',
@@ -141,14 +142,7 @@ class FallDetectionService {
           );
 
           Navigator.of(navigatorKey.currentContext!).pop(); // Close warning dialog
-
-          scaffoldKey.currentState?.showSnackBar(
-            const SnackBar(
-              content: Text('SOS Alert Activated'),
-              backgroundColor: Colors.red,
-              duration: Duration(seconds: 5),
-            ),
-          );
+          _showSOSResponseDialog(alertId); // Show response tracking dialog
         } catch (e) {
           print('Failed to send automatic SOS alert: $e');
         }
@@ -159,6 +153,129 @@ class FallDetectionService {
   void _cancelWarning() {
     _warningTimer?.cancel();
     _isWarningShown = false;
+  }
+
+  void _showSOSResponseDialog(String alertId) {
+    showDialog(
+      context: navigatorKey.currentContext!,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.emergency, color: Colors.red),
+            const SizedBox(width: 10),
+            const Text('SOS Alert Active'),
+          ],
+        ),
+        content: StreamBuilder<DocumentSnapshot>(
+          stream: _sosService.listenToSOSAlert(alertId),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Connecting to emergency services...'),
+                ],
+              );
+            }
+
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            final status = data['status'] as String;
+            final responder = data['responder'] as Map<String, dynamic>?;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildStatusInfo(status),
+                if (responder != null) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Responder Details:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildResponderInfo(responder),
+                ],
+                const SizedBox(height: 16),
+                const Text(
+                  'Stay calm and wait for help to arrive.',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await _sosService.cancelSOSAlert(alertId);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel SOS'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusInfo(String status) {
+    IconData icon;
+    String message;
+    Color color;
+
+    switch (status) {
+      case 'pending':
+        icon = Icons.access_time;
+        message = 'Emergency services have been notified';
+        color = Colors.orange;
+        break;
+      case 'assigned':
+        icon = Icons.local_hospital;
+        message = 'Responder is on the way';
+        color = Colors.blue;
+        break;
+      case 'resolved':
+        icon = Icons.check_circle;
+        message = 'Emergency has been resolved';
+        color = Colors.green;
+        break;
+      default:
+        icon = Icons.info;
+        message = 'Processing your emergency alert';
+        color = Colors.grey;
+    }
+
+    return Row(
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            message,
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResponderInfo(Map<String, dynamic> responder) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Name: ${responder['name'] ?? 'Not assigned'}'),
+            Text('ETA: ${responder['eta'] ?? 'Calculating...'}'),
+            if (responder['unit'] != null) Text('Unit: ${responder['unit']}'),
+          ],
+        ),
+      ),
+    );
   }
 
   bool get isMonitoring => _isMonitoring;
