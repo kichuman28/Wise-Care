@@ -148,12 +148,35 @@ class _SOSButtonState extends State<SOSButton> with SingleTickerProviderStateMix
           },
         ),
         actions: [
-          TextButton(
-            onPressed: () => _showCancellationWarning(context),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
-            child: const Text('Cancel SOS'),
+          StreamBuilder<DocumentSnapshot>(
+            stream: _sosService.listenToSOSAlert(_currentAlertId!),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox.shrink();
+
+              final data = snapshot.data!.data() as Map<String, dynamic>;
+              final status = data['status'] as String;
+
+              if (status == 'resolved') {
+                return TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    widget.onSOSCancelled?.call();
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.green,
+                  ),
+                  child: const Text('Close'),
+                );
+              }
+
+              return TextButton(
+                onPressed: () => _showCancellationWarning(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                ),
+                child: const Text('Cancel SOS'),
+              );
+            },
           ),
         ],
       ),
@@ -261,7 +284,7 @@ class _SOSButtonState extends State<SOSButton> with SingleTickerProviderStateMix
       case 'assigned':
         return 'A responder has been assigned to help you.';
       case 'resolved':
-        return 'Emergency has been resolved.';
+        return 'Emergency has been resolved. You can now close this dialog.';
       case 'cancelled':
         return 'Alert has been cancelled.';
       default:

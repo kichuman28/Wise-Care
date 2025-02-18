@@ -200,21 +200,45 @@ class FallDetectionService {
                   _buildResponderInfo(responder),
                 ],
                 const SizedBox(height: 16),
-                const Text(
-                  'Stay calm and wait for help to arrive.',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-                ),
+                if (status != 'resolved')
+                  const Text(
+                    'Stay calm and wait for help to arrive.',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                  ),
               ],
             );
           },
         ),
         actions: [
-          TextButton(
-            onPressed: () async {
-              await _sosService.cancelSOSAlert(alertId);
-              Navigator.of(context).pop();
+          StreamBuilder<DocumentSnapshot>(
+            stream: _sosService.listenToSOSAlert(alertId),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox.shrink();
+
+              final data = snapshot.data!.data() as Map<String, dynamic>;
+              final status = data['status'] as String;
+
+              if (status == 'resolved') {
+                return TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.green,
+                  ),
+                  child: const Text('Close'),
+                );
+              }
+
+              return TextButton(
+                onPressed: () async {
+                  await _sosService.cancelSOSAlert(alertId);
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                ),
+                child: const Text('Cancel SOS'),
+              );
             },
-            child: const Text('Cancel SOS'),
           ),
         ],
       ),
