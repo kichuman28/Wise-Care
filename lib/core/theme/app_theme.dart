@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFFFCC737);      // Yellow
-  static const Color secondary = Color(0xFFF26B0F);    // Orange
-  static const Color tertiary = Color(0xFFE73879);     // Pink
-  static const Color quaternary = Color(0xFF7E1891);   // Purple
-  
-  static const Color background = Color(0xFFFAFAFA);
+  static const Color primary = Color(0xFF2D336B); // Dark Navy Blue
+  static const Color secondary = Color(0xFF7886C7); // Medium Blue-Purple
+  static const Color tertiary = Color(0xFFA9B5DF); // Light Blue-Gray
+  static const Color quaternary = Color(0xFFFFF2F2); // Very Light Pink
+
+  static const Color background = Color(0xFFFFF2F2); // Using quaternary as background
   static const Color surface = Colors.white;
-  static const Color text = Color(0xFF1D1D1D);
-  static const Color textSecondary = Color(0xFF757575);
+  static const Color text = Color(0xFF2D336B); // Using primary for text
+  static const Color textSecondary = Color(0xFF7886C7); // Using secondary for secondary text
 }
 
 class AppTheme {
@@ -26,7 +26,7 @@ class AppTheme {
       onSurface: AppColors.text,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onTertiary: Colors.white,
+      onTertiary: AppColors.primary,
       error: Colors.red,
       onError: Colors.white,
     ),
@@ -64,4 +64,4 @@ class AppTheme {
       ),
     ),
   );
-} 
+}
