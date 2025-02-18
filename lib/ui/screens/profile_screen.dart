@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wise_care/ui/screens/emergency_contacts_screen.dart';
 import '../../core/providers/auth_provider.dart';
 import '../screens/login_screen.dart';
 import '../screens/document_vault_screen.dart';
@@ -86,6 +87,12 @@ class ProfileScreen extends StatelessWidget {
                         Colors.red,
                         () {
                           // Navigate to emergency contacts
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const EmergencyContactsScreen(),
+                            ),
+                          );
                         },
                       ),
                       _buildActionTile(
