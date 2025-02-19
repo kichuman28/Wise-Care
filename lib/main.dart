@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/providers/document_provider.dart';
+import 'core/providers/doctor_provider.dart';
+import 'core/providers/booking_provider.dart';
 import 'core/models/health_module_model.dart';
 import 'core/services/google_fit_service.dart';
 import 'ui/screens/login_screen.dart';
@@ -52,6 +54,18 @@ class _MyAppState extends State<MyApp> {
           update: (context, auth, previous) {
             if (auth.user != null) {
               return previous ?? DocumentProvider(userId: auth.user!.uid);
+            }
+            return null;
+          },
+        ),
+        ChangeNotifierProvider(create: (_) => DoctorProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, BookingProvider?>(
+          create: (_) => null,
+          update: (context, auth, previous) {
+            if (auth.user != null) {
+              final provider = previous ?? BookingProvider();
+              provider.loadUserBookings(auth.user!.uid);
+              return provider;
             }
             return null;
           },

@@ -16,6 +16,7 @@ class AppColors {
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
+    fontFamily: 'Quicksand',
     colorScheme: ColorScheme(
       brightness: Brightness.light,
       primary: AppColors.primary,
@@ -37,34 +38,40 @@ class AppTheme {
         fontWeight: FontWeight.bold,
         color: AppColors.text,
         height: 1.3,
+        fontFamily: 'Quicksand',
       ),
       displayMedium: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,
         color: AppColors.text,
         height: 1.3,
+        fontFamily: 'Quicksand',
       ),
       titleLarge: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.w600,
         color: AppColors.text,
         height: 1.3,
+        fontFamily: 'Quicksand',
       ),
       titleMedium: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w600,
         color: AppColors.text,
         height: 1.3,
+        fontFamily: 'Quicksand',
       ),
       bodyLarge: TextStyle(
         fontSize: 18, // Increased for better readability
         color: AppColors.text,
         height: 1.5,
+        fontFamily: 'Quicksand',
       ),
       bodyMedium: TextStyle(
         fontSize: 16, // Increased for better readability
         color: AppColors.textSecondary,
         height: 1.5,
+        fontFamily: 'Quicksand',
       ),
     ),
     cardTheme: CardTheme(
