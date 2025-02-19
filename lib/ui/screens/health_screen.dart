@@ -90,9 +90,9 @@ class _HealthScreenState extends State<HealthScreen> {
                 children: [
                   _buildDoctorSection(),
                   const SizedBox(height: 24),
-                  _buildUpcomingAppointments(),
+                  //_buildUpcomingAppointments(),
                   const SizedBox(height: 24),
-                  _buildHealthRecords(),
+                  //_buildHealthRecords(),
                 ],
               ),
             ),
@@ -112,27 +112,31 @@ class _HealthScreenState extends State<HealthScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Available Doctors',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to all doctors
-                  },
-                  child: const Text('View All'),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Available Doctors',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to all doctors
+                    },
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 200,
+              height: 280,
               child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 scrollDirection: Axis.horizontal,
                 itemCount: doctorProvider.doctors.length,
                 itemBuilder: (context, index) {
@@ -149,109 +153,173 @@ class _HealthScreenState extends State<HealthScreen> {
 
   Widget _buildDoctorCard(Doctor doctor) {
     return Container(
-      width: 300,
+      width: 280,
       margin: const EdgeInsets.only(right: 16),
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundImage: NetworkImage(doctor.imageUrl),
-                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                    child: doctor.imageUrl.isEmpty
-                        ? Icon(Icons.person, size: 24, color: Theme.of(context).primaryColor)
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          doctor.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          doctor.specialization,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+        child: InkWell(
+          onTap: () => _showBookingDialog(doctor),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage: NetworkImage(doctor.imageUrl),
+                      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                      child: doctor.imageUrl.isEmpty
+                          ? Icon(Icons.person, size: 30, color: Theme.of(context).primaryColor)
+                          : null,
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildInfoColumn(
-                    '${doctor.experience}+',
-                    'Years',
-                    Icons.work,
-                  ),
-                  _buildInfoColumn(
-                    '${doctor.patientsServed}+',
-                    'Patients',
-                    Icons.people,
-                  ),
-                  _buildInfoColumn(
-                    doctor.rating.toString(),
-                    'Rating',
-                    Icons.star,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Next Available',
-                style: TextStyle(
-                  color: Colors.grey[800],
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: doctor.availableDays
-                    .take(2)
-                    .map((day) => Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            doctor.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            day,
+                          const SizedBox(height: 4),
+                          Text(
+                            doctor.specialization,
                             style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(Icons.star, size: 16, color: Colors.amber[700]),
+                              const SizedBox(width: 4),
+                              Text(
+                                doctor.rating.toString(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  doctor.about,
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildInfoColumn(
+                      '${doctor.experience}+',
+                      'Years',
+                      Icons.work,
+                    ),
+                    Container(
+                      height: 24,
+                      width: 1,
+                      color: Colors.grey[300],
+                    ),
+                    _buildInfoColumn(
+                      '${doctor.patientsServed}+',
+                      'Patients',
+                      Icons.people,
+                    ),
+                    Container(
+                      height: 24,
+                      width: 1,
+                      color: Colors.grey[300],
+                    ),
+                    _buildInfoColumn(
+                      '₹${doctor.consultationFee}',
+                      'Fee',
+                      Icons.payments_outlined,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Available',
+                            style: TextStyle(
+                              color: Colors.grey[800],
+                              fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ))
-                    .toList(),
-              ),
-            ],
+                          const SizedBox(height: 8),
+                          Row(
+                            children: doctor.availableDays
+                                .take(3)
+                                .map((day) => Container(
+                                      margin: const EdgeInsets.only(right: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        day.substring(0, 3),
+                                        style: TextStyle(
+                                          color: Theme.of(context).primaryColor,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _showBookingDialog(doctor),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      ),
+                      child: const Text('Book Now'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
