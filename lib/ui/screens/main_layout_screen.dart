@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'health_screen.dart';
-import 'community_screen.dart';
 import 'profile_screen.dart';
 
 class MainLayoutScreen extends StatefulWidget {
@@ -17,7 +16,6 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const HealthScreen(),
-    const CommunityScreen(),
     const ProfileScreen(),
   ];
 
@@ -53,11 +51,6 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
               label: 'Health',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.people_outline),
-              activeIcon: Icon(Icons.people),
-              label: 'Community',
-            ),
-            BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               activeIcon: Icon(Icons.person),
               label: 'Profile',
@@ -67,4 +60,4 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
       ),
     );
   }
-} 
+}
