@@ -4,6 +4,7 @@ import '../widgets/greeting_header.dart';
 import '../widgets/sos_button.dart';
 import '../widgets/medicine_quick_action_button.dart';
 import '../widgets/doctor_quick_action_button.dart';
+import '../widgets/order_medicine_quick_action_button.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -79,10 +80,10 @@ class HomeScreen extends StatelessWidget {
                     crossAxisCount: 2,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
-                    childAspectRatio: 1.3,
-                    children: [
-                      const MedicineQuickActionButton(),
-                      const DoctorQuickActionButton(),
+                    children: const [
+                      DoctorQuickActionButton(),
+                      MedicineQuickActionButton(),
+                      OrderMedicineQuickActionButton(),
                     ],
                   ),
 
