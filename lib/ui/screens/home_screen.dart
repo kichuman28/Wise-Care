@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../widgets/greeting_header.dart';
-import '../../core/theme/app_theme.dart';
 import '../widgets/sos_button.dart';
+import '../widgets/medicine_quick_action_button.dart';
+import '../../core/theme/app_theme.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -58,23 +59,30 @@ class HomeScreen extends StatelessWidget {
                 crossAxisSpacing: 16,
                 childAspectRatio: 1.3,
                 children: [
-                  _buildQuickActionCard(
-                    context,
-                    'Doctor',
-                    Icons.medical_services_rounded,
-                    AppColors.primary,
-                  ),
-                  _buildQuickActionCard(
-                    context,
-                    'Medicine',
-                    Icons.medication_rounded,
-                    AppColors.secondary,
-                  ),
-                  _buildQuickActionCard(
-                    context,
-                    'Family',
-                    Icons.favorite_rounded,
-                    AppColors.tertiary,
+                  //DoctorQuickActionButton(userId: userId),
+                  const MedicineQuickActionButton(),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.tertiary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.favorite_rounded,
+                          size: 32,
+                          color: AppColors.tertiary,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Family',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -112,31 +120,6 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActionCard(BuildContext context, String title, IconData icon, Color color) {
-    return Card(
-      child: InkWell(
-        onTap: () {},
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: 32),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.text,
-                    ),
               ),
             ],
           ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/providers/auth_provider.dart';
+import '../../core/providers/prescription_provider.dart';
+import '../../core/utils/medication_scheduler.dart';
 
 class GreetingHeader extends StatelessWidget {
   const GreetingHeader({super.key});
@@ -19,8 +21,12 @@ class GreetingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
+    return Consumer2<AuthProvider, PrescriptionProvider?>(
+      builder: (context, authProvider, prescriptionProvider, _) {
+        final nextMedication = prescriptionProvider?.prescriptions != null
+            ? MedicationScheduler.getNextMedication(prescriptionProvider!.prescriptions)
+            : null;
+
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
@@ -55,9 +61,8 @@ class GreetingHeader extends StatelessWidget {
                       CircleAvatar(
                         radius: 24,
                         backgroundColor: AppColors.primary.withOpacity(0.1),
-                        backgroundImage: authProvider.userPhotoUrl != null
-                            ? NetworkImage(authProvider.userPhotoUrl!)
-                            : null,
+                        backgroundImage:
+                            authProvider.userPhotoUrl != null ? NetworkImage(authProvider.userPhotoUrl!) : null,
                         child: authProvider.userPhotoUrl == null
                             ? Icon(
                                 Icons.person,
@@ -86,44 +91,45 @@ class GreetingHeader extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-              Card(
-                elevation: 0,
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.notifications_active,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Next Medication',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Blood Pressure Medicine at 2:00 PM',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
+              if (nextMedication != null)
+                Card(
+                  elevation: 0,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.notifications_active,
+                          color: AppColors.primary,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Next Medication',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${nextMedication.medicineName} (${nextMedication.dosage}) at ${MedicationScheduler.formatMedicationTime(nextMedication.scheduledTime)}',
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         );
       },
     );
   }
-} 
+}
