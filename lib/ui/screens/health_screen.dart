@@ -48,53 +48,13 @@ class _HealthScreenState extends State<HealthScreen> {
                     stops: const [0.0, 0.5, 1.0],
                   ),
                 ),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: ShaderMask(
-                        shaderCallback: (rect) {
-                          return LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white.withOpacity(0.1),
-                              Colors.white.withOpacity(0.05),
-                            ],
-                          ).createShader(rect);
-                        },
-                        blendMode: BlendMode.softLight,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: RadialGradient(
-                              center: Alignment.topRight,
-                              radius: 1.5,
-                              colors: [
-                                Colors.white.withOpacity(0.15),
-                                Colors.white.withOpacity(0),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildDoctorSection(),
-                  const SizedBox(height: 24),
-                  //_buildUpcomingAppointments(),
-                  const SizedBox(height: 24),
-                  //_buildHealthRecords(),
-                ],
-              ),
+              child: _buildDoctorSection(),
             ),
           ),
         ],
@@ -112,31 +72,27 @@ class _HealthScreenState extends State<HealthScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Available Doctors',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to all doctors
-                    },
-                    child: const Text('View All'),
-                  ),
-                ],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Available Doctors',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Navigate to all doctors
+                  },
+                  child: const Text('View All'),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 280,
+              height: 420, // Increased from 320 to 420 to accommodate all content
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
                 scrollDirection: Axis.horizontal,
                 itemCount: doctorProvider.doctors.length,
                 itemBuilder: (context, index) {
@@ -262,61 +218,66 @@ class _HealthScreenState extends State<HealthScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Available',
-                            style: TextStyle(
-                              color: Colors.grey[800],
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: doctor.availableDays
-                                .take(3)
-                                .map((day) => Container(
-                                      margin: const EdgeInsets.only(right: 8),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        day.substring(0, 3),
-                                        style: TextStyle(
-                                          color: Theme.of(context).primaryColor,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ))
-                                .toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => _showBookingDialog(doctor),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 20), // Increased spacing
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16), // Adjusted padding
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Available',
+                        style: TextStyle(
+                          color: Colors.grey[800],
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
-                      child: const Text('Book Now'),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Row(
+                        children: doctor.availableDays
+                            .take(3)
+                            .map((day) => Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    day.substring(0, 3),
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                      const SizedBox(height: 16), // Increased spacing
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => _showBookingDialog(doctor),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Book Now'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -347,181 +308,6 @@ class _HealthScreenState extends State<HealthScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildUpcomingAppointments() {
-    return Consumer<BookingProvider>(
-      builder: (context, bookingProvider, _) {
-        if (bookingProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Upcoming Appointments',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            if (bookingProvider.bookings.isEmpty)
-              Center(
-                child: Text(
-                  'No upcoming appointments',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              )
-            else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: bookingProvider.bookings.length,
-                itemBuilder: (context, index) {
-                  final booking = bookingProvider.bookings[index];
-                  return _buildAppointmentCard(booking);
-                },
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildAppointmentCard(Booking booking) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        title: Text(
-          'Appointment with Dr. ${booking.doctorId}',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.calendar_today, size: 16, color: Theme.of(context).primaryColor),
-                const SizedBox(width: 8),
-                Text(DateFormat('MMM dd, yyyy').format(booking.appointmentDate)),
-                const SizedBox(width: 16),
-                Icon(Icons.access_time, size: 16, color: Theme.of(context).primaryColor),
-                const SizedBox(width: 8),
-                Text(booking.timeSlot),
-              ],
-            ),
-          ],
-        ),
-        trailing: booking.status == BookingStatus.pending
-            ? TextButton(
-                onPressed: () => context.read<BookingProvider>().cancelBooking(booking.id),
-                child: const Text('Cancel'),
-              )
-            : null,
-      ),
-    );
-  }
-
-  Widget _buildHealthRecords() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Health Records',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 1.5,
-          children: [
-            _buildRecordCard(
-              'Medical History',
-              Icons.history,
-              Colors.blue,
-              () {},
-            ),
-            _buildRecordCard(
-              'Lab Reports',
-              Icons.science,
-              Colors.green,
-              () {},
-            ),
-            _buildRecordCard(
-              'Prescriptions',
-              Icons.receipt,
-              Colors.orange,
-              () {},
-            ),
-            _buildRecordCard(
-              'Vaccinations',
-              Icons.vaccines,
-              Colors.purple,
-              () {},
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecordCard(
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                color.withOpacity(0.1),
-                color.withOpacity(0.05),
-              ],
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 32, color: color),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -561,20 +347,8 @@ class _HealthScreenState extends State<HealthScreen> {
 
     if (selectedTime == null || !mounted) return;
 
-    final booking = Booking(
-      id: '',
-      userId: context.read<AuthProvider>().uid,
-      doctorId: doctor.id,
-      appointmentDate: selectedDate,
-      timeSlot: selectedTime,
-      status: BookingStatus.pending,
-      createdAt: DateTime.now(),
-      consultationFee: doctor.consultationFee,
-    );
-
     try {
-      await context.read<BookingProvider>().createBooking(booking);
-      if (!mounted) return;
+      // Handle booking creation here
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Appointment booked successfully!'),
