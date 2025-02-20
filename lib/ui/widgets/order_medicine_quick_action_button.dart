@@ -6,6 +6,7 @@ import '../../core/providers/order_provider.dart';
 import '../../core/models/prescription_model.dart';
 import '../../core/models/order_model.dart';
 import 'package:intl/intl.dart';
+import 'quick_action_button.dart';
 
 class OrderMedicineQuickActionButton extends StatefulWidget {
   const OrderMedicineQuickActionButton({Key? key}) : super(key: key);
@@ -647,57 +648,24 @@ class _OrderMedicineQuickActionButtonState extends State<OrderMedicineQuickActio
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showOrderMedicinesList(context),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.shopping_cart_rounded,
-                size: 32,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Order Medicines',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Consumer<PrescriptionProvider?>(
-                builder: (context, provider, child) {
-                  if (provider == null || provider.isLoading) {
-                    return const SizedBox(
-                      height: 2,
-                      child: LinearProgressIndicator(),
-                    );
-                  }
-                  final activePrescriptions = provider.prescriptions.where((prescription) {
-                    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-                    return prescription.createdAt.isAfter(thirtyDaysAgo);
-                  }).length;
-                  return Text(
-                    '$activePrescriptions active prescriptions',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+    return Consumer<PrescriptionProvider?>(
+      builder: (context, provider, child) {
+        final isLoading = provider == null || provider.isLoading;
+        final activePrescriptions = isLoading
+            ? 0
+            : provider.prescriptions.where((prescription) {
+                final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+                return prescription.createdAt.isAfter(thirtyDaysAgo);
+              }).length;
+
+        return QuickActionButton(
+          title: 'Order\nMedicines',
+          subtitle: '$activePrescriptions active prescriptions',
+          icon: Icons.shopping_cart_rounded,
+          onTap: () => _showOrderMedicinesList(context),
+          isLoading: isLoading,
+        );
+      },
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../core/models/prescription_model.dart';
 import '../../core/providers/prescription_provider.dart';
 import '../../core/providers/auth_provider.dart';
+import 'quick_action_button.dart';
 
 class MedicineQuickActionButton extends StatelessWidget {
   const MedicineQuickActionButton({Key? key}) : super(key: key);
@@ -319,53 +320,19 @@ class MedicineQuickActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showPrescriptionsList(context),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.medication_rounded,
-                size: 32,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Medicines',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Consumer<PrescriptionProvider?>(
-                builder: (context, provider, child) {
-                  if (provider == null || provider.isLoading) {
-                    return const SizedBox(
-                      height: 2,
-                      child: LinearProgressIndicator(),
-                    );
-                  }
-                  return Text(
-                    '${provider.prescriptions.length} prescriptions',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+    return Consumer<PrescriptionProvider?>(
+      builder: (context, provider, child) {
+        final isLoading = provider == null || provider.isLoading;
+        final prescriptionCount = isLoading ? 0 : provider.prescriptions.length;
+
+        return QuickActionButton(
+          title: 'Medicines',
+          subtitle: '$prescriptionCount prescriptions',
+          icon: Icons.medication_rounded,
+          onTap: () => _showPrescriptionsList(context),
+          isLoading: isLoading,
+        );
+      },
     );
   }
 }

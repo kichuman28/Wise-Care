@@ -6,6 +6,7 @@ import '../../core/providers/auth_provider.dart';
 import '../../core/models/booking_model.dart';
 import '../../core/models/doctor_model.dart';
 import '../screens/doctor_details_screen.dart';
+import 'quick_action_button.dart';
 
 class DoctorQuickActionButton extends StatefulWidget {
   const DoctorQuickActionButton({super.key});
@@ -268,60 +269,19 @@ class _DoctorQuickActionButtonState extends State<DoctorQuickActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showDoctorsList(context),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.medical_services,
-                color: Theme.of(context).primaryColor,
-                size: 32,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'My Doctors',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Consumer<BookingProvider?>(
-                builder: (context, bookingProvider, _) {
-                  if (bookingProvider == null || bookingProvider.isLoading) {
-                    return Text(
-                      '...',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    );
-                  }
+    return Consumer<BookingProvider?>(
+      builder: (context, bookingProvider, _) {
+        final isLoading = bookingProvider == null || bookingProvider.isLoading;
+        final uniqueDoctors = isLoading ? 0 : bookingProvider.bookings.map((b) => b.doctorId).toSet().length;
 
-                  final uniqueDoctors = bookingProvider.bookings.map((b) => b.doctorId).toSet().length;
-
-                  return Text(
-                    '$uniqueDoctors doctors',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+        return QuickActionButton(
+          title: 'My Doctors',
+          subtitle: '$uniqueDoctors doctors',
+          icon: Icons.medical_services,
+          onTap: () => _showDoctorsList(context),
+          isLoading: isLoading,
+        );
+      },
     );
   }
 }
