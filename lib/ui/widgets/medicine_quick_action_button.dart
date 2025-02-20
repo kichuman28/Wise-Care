@@ -346,9 +346,9 @@ class MedicineQuickActionButton extends StatelessWidget {
                     ),
               ),
               const SizedBox(height: 4),
-              Consumer<PrescriptionProvider>(
+              Consumer<PrescriptionProvider?>(
                 builder: (context, provider, child) {
-                  if (provider.isLoading) {
+                  if (provider == null || provider.isLoading) {
                     return const SizedBox(
                       height: 2,
                       child: LinearProgressIndicator(),

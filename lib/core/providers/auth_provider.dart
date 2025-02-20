@@ -8,50 +8,64 @@ class AuthProvider extends ChangeNotifier {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? _user;
+  bool _isLoading = true;
+  String _userName = 'Guest';
+  String? _userPhotoUrl;
 
   AuthProvider() {
-    _auth.authStateChanges().listen((user) async {
-      _user = user;
-      if (user != null) {
-        debugPrint('Auth state changed - user signed in');
-        try {
-          await _saveUserToFirestore(user);
-        } catch (e) {
-          debugPrint('Error saving user data on auth state change: $e');
-        }
-      } else {
-        debugPrint('Auth state changed - user signed out');
-      }
-      notifyListeners();
-    });
+    _initializeAuth();
   }
 
   User? get user => _user;
   bool get isAuthenticated => _user != null;
+  bool get isLoading => _isLoading;
 
-  String get userName => _user?.displayName ?? 'Guest';
+  String get userName => _userName;
   String get userEmail => _user?.email ?? '';
-  String? get userPhotoUrl => _user?.photoURL;
+  String? get userPhotoUrl => _userPhotoUrl;
   String get uid => _user?.uid ?? '';
+
+  Future<void> _initializeAuth() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      // Listen to auth state changes
+      _auth.authStateChanges().listen((User? user) async {
+        _user = user;
+        if (user != null) {
+          // Get user data from Firestore
+          final userDoc = await _firestore.collection('users').doc(user.uid).get();
+          if (userDoc.exists) {
+            final userData = userDoc.data() as Map<String, dynamic>;
+            _userName = userData['displayName'] ?? user.displayName ?? 'Guest';
+            _userPhotoUrl = userData['photoURL'] ?? user.photoURL;
+          } else {
+            _userName = user.displayName ?? 'Guest';
+            _userPhotoUrl = user.photoURL;
+            // Save user data if not exists
+            await _saveUserToFirestore(user);
+          }
+        } else {
+          _userName = 'Guest';
+          _userPhotoUrl = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+      });
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> _saveUserToFirestore(User user) async {
     try {
-      debugPrint('Attempting to save user to Firestore...');
-      debugPrint('User ID: ${user.uid}');
-      debugPrint('User Email: ${user.email}');
-
       final userRef = _firestore.collection('users').doc(user.uid);
-      debugPrint('Created reference to users collection');
-
-      // Check if user document already exists
-      debugPrint('Checking if user document exists...');
       final userDoc = await userRef.get();
-      debugPrint('Document exists: ${userDoc.exists}');
 
       if (!userDoc.exists) {
-        debugPrint('Creating new user document...');
-        // Create new user document if it doesn't exist
-        final userData = {
+        await userRef.set({
           'uid': user.uid,
           'email': user.email,
           'displayName': user.displayName,
@@ -59,39 +73,32 @@ class AuthProvider extends ChangeNotifier {
           'createdAt': FieldValue.serverTimestamp(),
           'lastLoginAt': FieldValue.serverTimestamp(),
           'provider': 'google',
-        };
-        debugPrint('User data to save: $userData');
-        await userRef.set(userData);
-        debugPrint('Successfully created new user document');
+        });
       } else {
-        debugPrint('Updating existing user document...');
-        // Update last login time if user already exists
-        final updateData = {
+        await userRef.update({
           'lastLoginAt': FieldValue.serverTimestamp(),
           'email': user.email,
           'displayName': user.displayName,
           'photoURL': user.photoURL,
-        };
-        debugPrint('Update data: $updateData');
-        await userRef.update(updateData);
-        debugPrint('Successfully updated user document');
+        });
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('Error saving user to Firestore: $e');
-      debugPrint('Stack trace: $stackTrace');
       rethrow;
     }
   }
 
-  Future<UserCredential?> signInWithGoogle() async {
+  Future<void> signInWithGoogle() async {
     try {
-      debugPrint('Starting Google Sign In process...');
+      _isLoading = true;
+      notifyListeners();
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        debugPrint('Google Sign In was cancelled by user');
-        return null;
+        _isLoading = false;
+        notifyListeners();
+        return;
       }
-      debugPrint('Google Sign In successful, getting auth credentials...');
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -99,31 +106,48 @@ class AuthProvider extends ChangeNotifier {
         idToken: googleAuth.idToken,
       );
 
-      debugPrint('Getting Firebase UserCredential...');
       final userCredential = await _auth.signInWithCredential(credential);
-      debugPrint('Firebase UserCredential obtained successfully');
+      _user = userCredential.user;
 
-      // Save user data to Firestore after successful sign in
-      if (userCredential.user != null) {
-        debugPrint('Attempting to save user data to Firestore from signInWithGoogle...');
-        await _saveUserToFirestore(userCredential.user!);
+      if (_user != null) {
+        await _saveUserToFirestore(_user!);
+        // Update local state after saving to Firestore
+        final userDoc = await _firestore.collection('users').doc(_user!.uid).get();
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          _userName = userData['displayName'] ?? _user!.displayName ?? 'Guest';
+          _userPhotoUrl = userData['photoURL'] ?? _user!.photoURL;
+        }
       }
 
-      return userCredential;
+      _isLoading = false;
+      notifyListeners();
     } catch (e) {
-      debugPrint('Error signing in with Google: $e');
+      _isLoading = false;
+      notifyListeners();
       rethrow;
     }
   }
 
   Future<void> signOut() async {
     try {
+      _isLoading = true;
+      notifyListeners();
+
       await Future.wait([
         _auth.signOut(),
         _googleSignIn.signOut(),
       ]);
+
+      _user = null;
+      _userName = 'Guest';
+      _userPhotoUrl = null;
+
+      _isLoading = false;
+      notifyListeners();
     } catch (e) {
-      debugPrint('Error signing out: $e');
+      _isLoading = false;
+      notifyListeners();
       rethrow;
     }
   }

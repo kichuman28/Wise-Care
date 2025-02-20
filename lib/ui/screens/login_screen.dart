@@ -360,8 +360,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Image.network(
-                                    'https://www.google.com/favicon.ico',
+                                  Image.asset(
+                                    'assets/logo/google_logo.png',
                                     height: 24,
                                   ),
                                   const SizedBox(width: 12),

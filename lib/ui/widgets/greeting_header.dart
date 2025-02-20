@@ -50,42 +50,81 @@ class GreetingHeader extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        authProvider.userName,
-                        style: Theme.of(context).textTheme.displayMedium,
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: Text(
+                          authProvider.userName,
+                          key: ValueKey(authProvider.userName),
+                          style: Theme.of(context).textTheme.displayMedium,
+                        ),
                       ),
                     ],
                   ),
                   Stack(
                     children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
-                        backgroundImage:
-                            authProvider.userPhotoUrl != null ? NetworkImage(authProvider.userPhotoUrl!) : null,
-                        child: authProvider.userPhotoUrl == null
-                            ? Icon(
-                                Icons.person,
-                                color: AppColors.primary,
-                              )
-                            : null,
-                      ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 12,
-                          ),
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primary.withOpacity(0.1),
+                        ),
+                        child: ClipOval(
+                          child: authProvider.userPhotoUrl != null && !authProvider.isLoading
+                              ? Image.network(
+                                  authProvider.userPhotoUrl!,
+                                  width: 48,
+                                  height: 48,
+                                  fit: BoxFit.cover,
+                                  cacheWidth: 96, // 2x for high DPI displays
+                                  cacheHeight: 96,
+                                  errorBuilder: (context, error, stackTrace) => Icon(
+                                    Icons.person,
+                                    color: AppColors.primary,
+                                    size: 24,
+                                  ),
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress.expectedTotalBytes != null
+                                              ? loadingProgress.cumulativeBytesLoaded /
+                                                  loadingProgress.expectedTotalBytes!
+                                              : null,
+                                          strokeWidth: 2,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Icon(
+                                  Icons.person,
+                                  color: AppColors.primary,
+                                  size: 24,
+                                ),
                         ),
                       ),
+                      if (!authProvider.isLoading)
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 12,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ],
@@ -124,6 +163,13 @@ class GreetingHeader extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
+                ),
+              if (prescriptionProvider?.isLoading ?? false)
+                const Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Center(
+                    child: CircularProgressIndicator(),
                   ),
                 ),
             ],
