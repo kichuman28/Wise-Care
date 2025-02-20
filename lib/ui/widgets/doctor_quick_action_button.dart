@@ -5,6 +5,7 @@ import '../../core/providers/doctor_provider.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/models/booking_model.dart';
 import '../../core/models/doctor_model.dart';
+import '../screens/doctor_details_screen.dart';
 
 class DoctorQuickActionButton extends StatefulWidget {
   const DoctorQuickActionButton({super.key});
@@ -115,11 +116,10 @@ class _DoctorQuickActionButtonState extends State<DoctorQuickActionButton> {
                         margin: const EdgeInsets.only(bottom: 12),
                         child: InkWell(
                           onTap: () {
-                            // TODO: Implement doctor details navigation
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Doctor details coming soon'),
-                                duration: Duration(seconds: 2),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DoctorDetailsScreen(doctor: doctor),
                               ),
                             );
                           },
