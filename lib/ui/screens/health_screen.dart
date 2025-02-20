@@ -348,7 +348,26 @@ class _HealthScreenState extends State<HealthScreen> {
     if (selectedTime == null || !mounted) return;
 
     try {
-      // Handle booking creation here
+      final userId = context.read<AuthProvider>().user?.uid;
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      final booking = Booking(
+        id: '', // Will be set by Firebase
+        userId: userId,
+        doctorId: doctor.id,
+        appointmentDate: selectedDate,
+        timeSlot: selectedTime,
+        status: BookingStatus.pending,
+        createdAt: DateTime.now(),
+        consultationFee: doctor.consultationFee,
+        notes: null,
+      );
+
+      await context.read<BookingProvider>().createBooking(booking);
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Appointment booked successfully!'),
@@ -359,7 +378,7 @@ class _HealthScreenState extends State<HealthScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to book appointment: $e'),
+          content: Text('Failed to book appointment: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
