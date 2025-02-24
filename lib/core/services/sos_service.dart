@@ -4,12 +4,14 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'emergency_notification_service.dart';
 
 class SOSService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Battery _battery = Battery();
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
+  final EmergencyNotificationService _notificationService = EmergencyNotificationService();
 
   Future<String> createSOSAlert({
     required double latitude,
@@ -58,6 +60,15 @@ class SOSService {
 
       // Add to Firestore
       final docRef = await _firestore.collection('sos_alerts').add(alertData);
+
+      // Send emergency notifications
+      await _notificationService.sendEmergencyNotification(
+        alertId: docRef.id,
+        latitude: latitude,
+        longitude: longitude,
+        isFallDetected: medicalInfo?['fallDetected'] == true,
+      );
+
       return docRef.id;
     } catch (e) {
       throw Exception('Failed to create SOS alert: $e');
