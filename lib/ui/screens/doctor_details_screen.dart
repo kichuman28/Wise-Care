@@ -5,6 +5,7 @@ import '../../core/models/doctor_model.dart';
 import '../../core/models/message_model.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import 'package:intl/intl.dart';
 
 class DoctorDetailsScreen extends StatefulWidget {
   final Doctor doctor;
@@ -192,15 +193,61 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                     }).toList() ??
                     [];
 
+                // Sort messages by timestamp
+                messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+                // Create a list of widgets that includes both messages and date headers
+                final List<Widget> messageWidgets = [];
+                DateTime? lastDate;
+
+                for (var i = 0; i < messages.length; i++) {
+                  final message = messages[i];
+                  final messageDate = DateTime(
+                    message.timestamp.year,
+                    message.timestamp.month,
+                    message.timestamp.day,
+                  );
+
+                  // Add date header if this is a new date
+                  if (lastDate == null || messageDate.compareTo(lastDate) != 0) {
+                    messageWidgets.add(
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              _formatMessageDate(messageDate),
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                    lastDate = messageDate;
+                  }
+
+                  // Add the message bubble
+                  final isDoctor = message.senderId == widget.doctor.id;
+                  messageWidgets.add(_buildMessageBubble(message, isDoctor));
+                }
+
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(16),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isDoctor = message.senderId == widget.doctor.id;
-                    return _buildMessageBubble(message, isDoctor);
-                  },
+                  itemCount: messageWidgets.length,
+                  itemBuilder: (context, index) => messageWidgets[index],
                 );
               },
             ),
@@ -351,6 +398,20 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
       return '${difference.inMinutes}m ago';
     } else {
       return 'Just now';
+    }
+  }
+
+  String _formatMessageDate(DateTime date) {
+    final now = DateTime.now();
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+    final messageDate = DateTime(date.year, date.month, date.day);
+
+    if (messageDate == DateTime(now.year, now.month, now.day)) {
+      return 'Today';
+    } else if (messageDate == yesterday) {
+      return 'Yesterday';
+    } else {
+      return DateFormat('MMMM d, yyyy').format(date);
     }
   }
 
