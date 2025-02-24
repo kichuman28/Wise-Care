@@ -61,8 +61,8 @@ class SOSService {
       // Add to Firestore
       final docRef = await _firestore.collection('sos_alerts').add(alertData);
 
-      // Send emergency notifications
-      await _notificationService.sendEmergencyNotification(
+      // Send emergency notifications asynchronously
+      _sendEmergencyNotifications(
         alertId: docRef.id,
         latitude: latitude,
         longitude: longitude,
@@ -72,6 +72,26 @@ class SOSService {
       return docRef.id;
     } catch (e) {
       throw Exception('Failed to create SOS alert: $e');
+    }
+  }
+
+  Future<void> _sendEmergencyNotifications({
+    required String alertId,
+    required double latitude,
+    required double longitude,
+    required bool isFallDetected,
+  }) async {
+    try {
+      await _notificationService.sendEmergencyNotification(
+        alertId: alertId,
+        latitude: latitude,
+        longitude: longitude,
+        isFallDetected: isFallDetected,
+      );
+    } catch (e) {
+      print('Failed to send emergency notifications: $e');
+      // Don't rethrow the error since this is a background operation
+      // and shouldn't affect the main SOS flow
     }
   }
 
