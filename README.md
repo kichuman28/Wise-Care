@@ -1,6 +1,8 @@
 # 🌟 Wise Care - Your Health Companion
 
-<img src="assets/logo/logo_no_text.png" alt="Wise Care Banner" width="150" align="center"/>
+<p align="center">
+  <img src="assets/logo/logo_no_text.png" alt="Wise Care Banner" width="150"/>
+</p>
 
 ## 📱 Overview
 
