@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'core/providers/auth_provider.dart';
@@ -14,9 +15,27 @@ import 'core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/services/sos_service.dart';
 import 'core/services/fall_detection_service.dart';
+import 'package:lottie/lottie.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Set preferred orientations
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Set system UI overlay style for status bar
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp();
   runApp(const MyApp());
@@ -30,10 +49,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
+      GlobalKey<ScaffoldMessengerState>();
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late final SOSService _sosService;
   late final FallDetectionService _fallDetectionService;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -44,6 +65,19 @@ class _MyAppState extends State<MyApp> {
       scaffoldKey: _scaffoldKey,
       navigatorKey: _navigatorKey,
     );
+
+    // Simulate initialization delay for splash screen
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    // Simulate app initialization with a delay
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      setState(() {
+        _isInitialized = true;
+      });
+    }
   }
 
   @override
@@ -96,8 +130,10 @@ class _MyAppState extends State<MyApp> {
         ),
         Provider(create: (_) => GoogleFitService()),
         ChangeNotifierProxyProvider<GoogleFitService, HealthModuleModel>(
-          create: (context) => HealthModuleModel(context.read<GoogleFitService>()),
-          update: (context, googleFitService, previous) => previous ?? HealthModuleModel(googleFitService),
+          create: (context) =>
+              HealthModuleModel(context.read<GoogleFitService>()),
+          update: (context, googleFitService, previous) =>
+              previous ?? HealthModuleModel(googleFitService),
         ),
       ],
       child: MaterialApp(
@@ -106,13 +142,79 @@ class _MyAppState extends State<MyApp> {
         title: 'Wise Care',
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
-        home: Builder(
-          builder: (context) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _fallDetectionService.startMonitoring();
-            });
-            return const LoginScreen();
-          },
+        home: !_isInitialized
+            ? const SplashScreen()
+            : Builder(
+                builder: (context) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _fallDetectionService.startMonitoring();
+                  });
+                  return const LoginScreen();
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: AppColors.primaryGradient,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo
+                Image.asset(
+                  'assets/logo/wise-care.png',
+                  width: 150,
+                  height: 150,
+                ),
+                const SizedBox(height: 24),
+
+                // App name
+                const Text(
+                  'WISE CARE',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Tagline
+                const Text(
+                  'Your Health, Our Priority',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 48),
+
+                // Loading indicator
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  strokeWidth: 3,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
