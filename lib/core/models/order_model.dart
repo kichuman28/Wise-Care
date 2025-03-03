@@ -52,7 +52,7 @@ class Order {
   final DateTime orderDate;
   final String status;
   final double totalAmount;
-  final String? deliveryAddress;
+  final String? addressId;
 
   Order({
     this.id,
@@ -62,7 +62,7 @@ class Order {
     required this.orderDate,
     required this.status,
     required this.totalAmount,
-    this.deliveryAddress,
+    this.addressId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -72,17 +72,19 @@ class Order {
         'orderDate': Timestamp.fromDate(orderDate),
         'status': status,
         'totalAmount': totalAmount,
-        'deliveryAddress': deliveryAddress,
+        'addressId': addressId,
       };
 
   factory Order.fromJson(Map<String, dynamic> json, String orderId) => Order(
         id: orderId,
         userId: json['userId'] as String,
         prescriptionId: json['prescriptionId'] as String,
-        medicines: (json['medicines'] as List).map((m) => OrderMedicine.fromJson(m as Map<String, dynamic>)).toList(),
+        medicines: (json['medicines'] as List)
+            .map((m) => OrderMedicine.fromJson(m as Map<String, dynamic>))
+            .toList(),
         orderDate: (json['orderDate'] as Timestamp).toDate(),
         status: json['status'] as String,
         totalAmount: (json['totalAmount'] as num).toDouble(),
-        deliveryAddress: json['deliveryAddress'] as String?,
+        addressId: json['addressId'] as String?,
       );
 }

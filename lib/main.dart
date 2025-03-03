@@ -8,6 +8,7 @@ import 'core/providers/doctor_provider.dart';
 import 'core/providers/booking_provider.dart';
 import 'core/providers/prescription_provider.dart';
 import 'core/providers/order_provider.dart';
+import 'core/providers/user_address_provider.dart';
 import 'core/models/health_module_model.dart';
 import 'core/services/google_fit_service.dart';
 import 'ui/screens/login_screen.dart';
@@ -123,6 +124,17 @@ class _MyAppState extends State<MyApp> {
             if (auth.user != null) {
               final provider = previous ?? OrderProvider();
               provider.loadUserOrders(auth.user!.uid);
+              return provider;
+            }
+            return null;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, UserAddressProvider?>(
+          create: (_) => null,
+          update: (context, auth, previous) {
+            if (auth.user != null) {
+              final provider = previous ?? UserAddressProvider();
+              provider.loadUserAddresses(auth.user!.uid);
               return provider;
             }
             return null;

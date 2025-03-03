@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import '../models/order_model.dart';
 
 class OrderProvider extends ChangeNotifier {
-  final firestore.FirebaseFirestore _firestore = firestore.FirebaseFirestore.instance;
+  final firestore.FirebaseFirestore _firestore =
+      firestore.FirebaseFirestore.instance;
   bool _isLoading = false;
   List<Order> _orders = [];
 
@@ -32,7 +33,9 @@ class OrderProvider extends ChangeNotifier {
         .where('userId', isEqualTo: userId)
         .orderBy('orderDate', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Order.fromJson(doc.data(), doc.id)).toList());
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Order.fromJson(doc.data(), doc.id))
+            .toList());
   }
 
   Future<void> loadUserOrders(String userId) async {
@@ -46,7 +49,9 @@ class OrderProvider extends ChangeNotifier {
           .orderBy('orderDate', descending: true)
           .get();
 
-      _orders = snapshot.docs.map((doc) => Order.fromJson(doc.data(), doc.id)).toList();
+      _orders = snapshot.docs
+          .map((doc) => Order.fromJson(doc.data(), doc.id))
+          .toList();
 
       _isLoading = false;
       notifyListeners();
@@ -59,7 +64,10 @@ class OrderProvider extends ChangeNotifier {
 
   Future<void> updateOrderStatus(String orderId, String status) async {
     try {
-      await _firestore.collection('orders').doc(orderId).update({'status': status});
+      await _firestore
+          .collection('orders')
+          .doc(orderId)
+          .update({'status': status});
 
       final index = _orders.indexWhere((order) => order.id == orderId);
       if (index != -1) {
@@ -71,7 +79,7 @@ class OrderProvider extends ChangeNotifier {
           orderDate: _orders[index].orderDate,
           status: status,
           totalAmount: _orders[index].totalAmount,
-          deliveryAddress: _orders[index].deliveryAddress,
+          addressId: _orders[index].addressId,
         );
         _orders[index] = updatedOrder;
         notifyListeners();
